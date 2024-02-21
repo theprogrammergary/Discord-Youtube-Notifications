@@ -31,9 +31,9 @@ async function subscribe2PubSubHub(channelId: string) {
       headers: headers,
       body: body,
     });
-    logger.info(`Subscription for channel ID ${channelId}:`, response.status);
+    logger.info(`ℹ️ Subscription for channelID ${channelId}:`, response.status);
   } catch (error) {
-    logger.error(`Error making subscription request for channel ID ${channelId}:`, error);
+    logger.error(`❌ Error making subscription request for channel ID ${channelId}:`, error);
   }
 }
 
