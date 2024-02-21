@@ -13,6 +13,7 @@ const dataDir = path.join(__dirname, "data/");
  */
 function setup(req: express.Request, res: express.Response) {
   const hubChallenge: string = req.query["hub.challenge"] as string;
+  logger.info("ℹ️ NEW hubChallenge")
   res.status(200).send(hubChallenge);
 }
 
