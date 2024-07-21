@@ -1,15 +1,12 @@
 import * as express from "express";
 import { logger } from "firebase-functions/v2";
 
-import { readFromJsonFile } from "../../shared/shared";
 import { xmlUtils } from "../../shared/xml";
 
-import * as path from "path";
-import { getCollection } from "../../data";
+import { Timestamp } from "firebase-admin/firestore";
+import { addDocument, getCollection } from "../../data";
 import { handleNewVideo, isNewVideo } from "./functions";
 import { IYoutubePubSubUpdate } from "./vars";
-
-const DATA_DIR = path.join(__dirname, "data/");
 
 function setup(req: express.Request, res: express.Response) {
   const hubChallenge: string = req.query["hub.challenge"] as string;
@@ -23,12 +20,12 @@ async function update(req: express.Request, res: express.Response) {
   const data: IYoutubePubSubUpdate | null = await xmlUtils.parseXmlToJson(req.body.toString("utf-8"));
   const entry = data?.feed?.entry;
   if (entry) {
-    const videoList = readFromJsonFile(DATA_DIR + "videos.json");
+    const videoList = await getCollection("videos");
     const newVideo = isNewVideo(entry, videoList);
 
     if (newVideo) {
       logger.info("✅ NEW YoutubePubSubHub Update:", data)
-      await handleNewVideo(data, videoList, DATA_DIR);
+      await handleNewVideo(data);
     } else {
       logger.info("❌ YoutubePubSubHub Update:", data)
     }
@@ -41,6 +38,16 @@ async function getVideos(req: express.Request, res: express.Response) {
   res.status(200).send(await getCollection("videos"));
 }
 
+async function addVideo(req: express.Request, res: express.Response) {
+  const videoData = {
+    id: req.body.id,
+    title: req.body.title,
+    published: new Timestamp(parseInt(req.body.published), 0)
+  };
+
+  res.status(200).send(await addDocument("videos", req.body.id, videoData));
+}
+
 export const ytNotificationMethods = {
   "route": "/youtube-new-video-notification",
   get: setup,
@@ -50,4 +57,3 @@ export const ytNotificationMethods = {
     get: getVideos,
   }
 };
-
