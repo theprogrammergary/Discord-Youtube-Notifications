@@ -2,3 +2,6 @@ lib/
 typings/
 node_modules/
 .env
+
+# firebase
+firestore-auth.json

@@ -4,10 +4,11 @@ import { logger } from "firebase-functions/v2";
 import { readFromJsonFile } from "../../shared/shared";
 import { xmlUtils } from "../../shared/xml";
 
+import * as path from "path";
+import { getCollection } from "../../data";
 import { handleNewVideo, isNewVideo } from "./functions";
 import { IYoutubePubSubUpdate } from "./vars";
 
-import * as path from "path";
 const DATA_DIR = path.join(__dirname, "data/");
 
 function setup(req: express.Request, res: express.Response) {
@@ -36,8 +37,17 @@ async function update(req: express.Request, res: express.Response) {
   }
 }
 
+async function getVideos(req: express.Request, res: express.Response) {
+  res.status(200).send(await getCollection("videos"));
+}
+
 export const ytNotificationMethods = {
   "route": "/youtube-new-video-notification",
   get: setup,
   post: update,
+  data: {
+    "route": "/youtube-new-video-notification/data",
+    get: getVideos,
+  }
 };
+
