@@ -70,7 +70,8 @@ function isNewVideo(entry: any, videoList: any): boolean {
   const publishedDate: Date = new Date(entry.published);
   const currentDate: Date = new Date();
   const isPublishedWithinLastDay: boolean = (currentDate.getTime() - publishedDate.getTime()) < (1000 * 60 * 60 * 24);
-  return untrackedVideo && isPublishedWithinLastDay;
+  const isLivestream: boolean = entry.title.toLowerCase().includes("live");
+  return untrackedVideo && isPublishedWithinLastDay && !isLivestream;
 }
 
 /**
@@ -82,7 +83,7 @@ async function validYoutubeVideo(data: youtubePubSubUpdate, videoList: any) {
   await updateVideoList(data, videoList);
   const entry = data.feed?.entry;
   if (entry?.title && entry["yt:videoId"]) {
-    const tags: string[] = entry?.["yt:channelId"] === youtube.RECAP_CHANNEL ?
+    const tags: number[] = entry?.["yt:channelId"] === youtube.RECAP_CHANNEL ?
       [youtube.RECAP_TAG] : [];
     const videoUrl = `https://www.youtube.com/watch?v=${entry["yt:videoId"]}`;
     await sendDiscordPost(

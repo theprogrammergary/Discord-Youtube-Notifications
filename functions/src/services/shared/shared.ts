@@ -74,7 +74,7 @@ export async function sendDiscordPost(
   channelId: string,
   title: string,
   message: string,
-  tags: string[]
+  tags: number[]
 ) {
   fetch(`https://discord.com/api/v9/channels/${channelId}/threads`, {
     method: "POST",
