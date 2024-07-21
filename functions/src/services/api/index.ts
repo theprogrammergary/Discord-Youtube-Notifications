@@ -1,4 +1,4 @@
-import * as express from "express";
+import express from "express";
 import { ytNotificationMethods } from "./youtube-newvideo-notifications";
 
 // express app
