@@ -37,6 +37,7 @@ async function update(req: express.Request, res: express.Response) {
 }
 
 export const ytNotificationMethods = {
+  "route": "youtube-new-video",
   get: setup,
   post: update,
 };

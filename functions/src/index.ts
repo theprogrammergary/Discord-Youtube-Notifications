@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions/v2";
 import { apiApp } from "./services/api";
-import { subscribe2PubSubHubs } from "./services/youtube/subscribe-2-channel/function-subscribe";
+import { subscribe2PubSubHubs } from "./services/api/youtube-newvideo-notifications/subscription";
 
 // firebase functions
 export const api = functions

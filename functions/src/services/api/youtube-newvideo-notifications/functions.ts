@@ -9,8 +9,7 @@ export async function handleNewVideo(data: IYoutubePubSubUpdate, videoList: any,
 
   const entry = data.feed?.entry;
   if (entry?.title && entry["yt:videoId"]) {
-    const tags: number[] = entry?.["yt:channelId"] === YOUTUBE.RECAP_CHANNEL ?
-      [YOUTUBE.RECAP_TAG] : [];
+    const tags: number[] = entry?.["yt:channelId"] === YOUTUBE.RECAP_CHANNEL ? [parseInt(YOUTUBE.RECAP_TAG)] : [];
     const videoUrl = `https://www.youtube.com/watch?v=${entry["yt:videoId"]}`;
     await discordUtils.sendPost(
       YOUTUBE.DISCORD_TOKEN,
@@ -38,9 +37,13 @@ async function updateVideoList(data: IYoutubePubSubUpdate, videoList: any, DATA_
 
 export function isNewVideo(entry: any, videoList: any): boolean {
   const untrackedVideo = !Object.keys(videoList).includes(entry["yt:videoId"]);
+
   const publishedDate: Date = new Date(entry.published);
+
   const currentDate: Date = new Date();
+
   const isPublishedWithinLastDay: boolean = (currentDate.getTime() - publishedDate.getTime()) < (1000 * 60 * 60 * 24);
+
   const isLivestream: boolean = entry.title.toLowerCase().includes("live");
 
   return untrackedVideo && isPublishedWithinLastDay && !isLivestream;
