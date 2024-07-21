@@ -1,12 +1,17 @@
-import * as express from "express";
-import { onRequest } from "firebase-functions/v2/https";
-import { youtubeMethods } from "./services/youtube/controller";
-import { subscribeTask } from "./services/youtube/subscribe";
+import * as functions from "firebase-functions/v2";
+import { apiApp } from "./services/api";
+import { subscribe2PubSubHubs } from "./services/youtube/subscribe-2-channel/function-subscribe";
 
-const app: express.Application = express();
+// firebase functions
+export const api = functions
+  .https
+  .onRequest({ maxInstances: 1 }, apiApp);
 
-app.get("/youtube-notifications", youtubeMethods.get);
-app.post("/youtube-notifications", youtubeMethods.post);
-
-export const api = onRequest(app);
-export const youtubeTasks = subscribeTask;
+export const subscribe2YTPubSubHub = functions
+  .scheduler
+  .onSchedule({
+    schedule: "every 24 hours",
+    maxInstances: 1,
+  }, async () => {
+    await subscribe2PubSubHubs();
+  });

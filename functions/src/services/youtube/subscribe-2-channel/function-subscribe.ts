@@ -1,6 +1,10 @@
-import * as functions from "firebase-functions/v2";
 import { logger } from "firebase-functions/v2";
-import { youtube } from "./vars";
+import { youtube } from "../../api/youtube-notifications/vars";
+
+export async function subscribe2PubSubHubs() {
+  await subscribe2PubSubHub(youtube.MAIN_CHANNEL);
+  await subscribe2PubSubHub(youtube.RECAP_CHANNEL);
+}
 
 async function subscribe2PubSubHub(channelId: string) {
   if (channelId.trim() === "") {
@@ -25,6 +29,7 @@ async function subscribe2PubSubHub(channelId: string) {
     "upgrade-insecure-requests": "1",
   };
   const body = `hub.callback=https%3A%2F%2Fapi-6dsg2pg42q-uc.a.run.app%2Fyoutube-notifications&hub.topic=https%3A%2F%2Fwww.youtube.com%2Fxml%2Ffeeds%2Fvideos.xml%3Fchannel_id%3D${channelId}&hub.verify=async&hub.mode=subscribe&hub.verify_token=&hub.secret=&hub.lease_numbers=`;
+
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -36,10 +41,3 @@ async function subscribe2PubSubHub(channelId: string) {
     logger.error(`❌ Error making subscription request for channel ID ${channelId}:`, error);
   }
 }
-
-export const subscribeTask = functions
-  .scheduler
-  .onSchedule("every 24 hours", async () => {
-    await subscribe2PubSubHub(youtube.MAIN_CHANNEL);
-    await subscribe2PubSubHub(youtube.RECAP_CHANNEL);
-  });
