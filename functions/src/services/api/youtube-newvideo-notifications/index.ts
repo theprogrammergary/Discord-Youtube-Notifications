@@ -3,8 +3,7 @@ import { logger } from "firebase-functions/v2";
 
 import { xmlUtils } from "../../shared/xml";
 
-import { Timestamp } from "firebase-admin/firestore";
-import { addDocument, getCollection } from "../../data";
+import { getCollection } from "../../data";
 import { handleNewVideo, isNewVideo } from "./functions";
 import { IYoutubePubSubUpdate } from "./vars";
 
@@ -38,15 +37,15 @@ async function getVideos(req: express.Request, res: express.Response) {
   res.status(200).send(await getCollection("videos"));
 }
 
-async function addVideo(req: express.Request, res: express.Response) {
-  const videoData = {
-    id: req.body.id,
-    title: req.body.title,
-    published: new Timestamp(parseInt(req.body.published), 0)
-  };
+// async function addVideo(req: express.Request, res: express.Response) {
+//   const videoData = {
+//     id: req.body.id,
+//     title: req.body.title,
+//     published: new Timestamp(parseInt(req.body.published), 0)
+//   };
 
-  res.status(200).send(await addDocument("videos", req.body.id, videoData));
-}
+//   res.status(200).send(await addDocument("videos", req.body.id, videoData));
+// }
 
 export const ytNotificationMethods = {
   "route": "/youtube-new-video-notification",
