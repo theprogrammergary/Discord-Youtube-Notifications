@@ -1,9 +1,9 @@
 
 import { Timestamp } from "firebase-admin/firestore";
+import { logger } from "firebase-functions/v2";
+import { addDocument } from "../../data";
 import { discordUtils } from "../../shared/discord";
 import { IYoutubePubSubUpdate, YOUTUBE } from "./vars";
-
-import { addDocument } from "../../data";
 
 export function createFirestoreVideo(entry: any) {
   const newVideoInfo = {
@@ -29,7 +29,10 @@ export async function handleNewVideo(data: IYoutubePubSubUpdate) {
 
   const entry = data.feed?.entry;
   if (entry?.title && entry["yt:videoId"]) {
-    const tags: number[] = entry?.["yt:channelId"] === YOUTUBE.RECAP_CHANNEL ? [parseInt(YOUTUBE.RECAP_TAG)] : [];
+    const tags: string[] = entry?.["yt:channelId"] === YOUTUBE.RECAP_CHANNEL ? ["1202000520714407966"] : [];
+
+    logger.info(`TAGS FOR THE VIDEO: ${tags}`);
+
     const videoUrl = `https://www.youtube.com/watch?v=${entry["yt:videoId"]}`;
     await discordUtils.sendPost(
       YOUTUBE.DISCORD_TOKEN,
@@ -42,15 +45,25 @@ export async function handleNewVideo(data: IYoutubePubSubUpdate) {
 }
 
 export function isNewVideo(entry: any, videoList: any): boolean {
-  const untrackedVideo = !Object.keys(videoList).includes(entry["yt:videoId"]);
-
-  const publishedDate = new Timestamp(parseInt(entry.published), 0).toDate();
-
-  const currentDate = new Date();
-
-  const isPublishedWithinLastDay = (currentDate.getTime() - publishedDate.getTime()) < (1000 * 60 * 60 * 24);
-
   const isLivestream = entry.title.toLowerCase().includes("live");
+  if (isLivestream) {
+    return false;
+  }
 
-  return untrackedVideo && isPublishedWithinLastDay && !isLivestream;
+  const untrackedVideo = !Object.keys(videoList).includes(entry["yt:videoId"]);
+  if (!untrackedVideo) {
+    return false;
+  }
+
+  const publishedDate = new Date(entry.published).getTime();
+
+  const currentDate = new Date().getTime();
+
+  const isPublishedWithinLastDay = (currentDate - publishedDate) < (1000 * 60 * 60 * 24);
+
+  if (!isPublishedWithinLastDay) {
+    return false;
+  }
+
+  return true;
 }

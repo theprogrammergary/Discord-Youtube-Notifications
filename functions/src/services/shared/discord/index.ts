@@ -1,4 +1,3 @@
-
 import { logger } from "firebase-functions/v2";
 
 async function sendMessage(token: string, channelId: string, message: string) {
@@ -25,21 +24,24 @@ async function sendPost(
   channelId: string,
   title: string,
   message: string,
-  tags: number[]
+  tags: string[]
 ) {
+  const requestBody = JSON.stringify({
+    name: title,
+    message: { content: message },
+    applied_tags: tags,
+  })
+
+  logger.info("Sending discord post", { requestBody })
   fetch(`https://discord.com/api/v9/channels/${channelId}/threads`, {
     method: "POST",
     headers: {
       "Authorization": `Bot ${token}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify(
-      {
-        name: title,
-        message: { content: message },
-        applied_tages: tags
-      }),
+    body: requestBody,
   })
+
     .then(response => {
       if (!response.ok) {
         logger.warn("Failed to send discord message", response)
