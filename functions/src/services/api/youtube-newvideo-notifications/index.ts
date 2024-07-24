@@ -26,7 +26,7 @@ async function update(req: express.Request, res: express.Response) {
       logger.info("✅ NEW YoutubePubSubHub Update:", data)
       await handleNewVideo(data);
     } else {
-      logger.info("❌ YoutubePubSubHub Update:", data)
+      logger.info("❌ OLD YoutubePubSubHub Update:", data)
     }
   } else {
     logger.info("❌ INVALID YoutubePubSubHub:", data)

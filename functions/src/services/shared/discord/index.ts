@@ -32,7 +32,6 @@ async function sendPost(
     applied_tags: tags,
   })
 
-  logger.info("Sending discord post", { requestBody })
   fetch(`https://discord.com/api/v9/channels/${channelId}/threads`, {
     method: "POST",
     headers: {
@@ -41,7 +40,6 @@ async function sendPost(
     },
     body: requestBody,
   })
-
     .then(response => {
       if (!response.ok) {
         logger.warn("Failed to send discord message", response)
