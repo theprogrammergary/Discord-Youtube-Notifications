@@ -47,11 +47,13 @@ export async function handleNewVideo(data: IYoutubePubSubUpdate) {
 export function isNewVideo(entry: any, videoList: any): boolean {
   const isLivestream = entry.title.toLowerCase().includes("live");
   if (isLivestream) {
+    logger.info("VIDEO IS LIVESTREAM");
     return false;
   }
 
   const untrackedVideo = !Object.keys(videoList).includes(entry["yt:videoId"]);
   if (!untrackedVideo) {
+    logger.info("VIDEO IS ALREADY TRACKED");
     return false;
   }
 
@@ -62,6 +64,7 @@ export function isNewVideo(entry: any, videoList: any): boolean {
   const isPublishedWithinLastDay = (currentDate - publishedDate) < (1000 * 60 * 60 * 24);
 
   if (!isPublishedWithinLastDay) {
+    logger.info("VIDEOIS NOT PUBLISHED WITHIN LAST DAY");
     return false;
   }
 
