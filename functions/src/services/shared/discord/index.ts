@@ -1,22 +1,22 @@
+import axios from "axios";
 import { logger } from "firebase-functions/v2";
 
 async function sendMessage(token: string, channelId: string, message: string) {
-  fetch(`https://discord.com/api/v9/channels/${channelId}/messages`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bot ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ content: message }),
-  })
-    .then(response => {
-      if (!response.ok) {
-        logger.warn("Failed to send discord message", response)
+  try {
+    await axios.post(
+      `https://discord.com/api/v9/channels/${channelId}/messages`,
+      { content: message },
+      {
+        headers: {
+          "Authorization": `Bot ${token}`,
+          "Content-Type": "application/json",
+        },
       }
-    })
-    .catch(error => {
-      logger.error("Error sending discord message", error)
-    });
+    );
+  } catch (error) {
+    logger.error("Error sending discord message", error);
+    throw error;
+  }
 }
 
 async function sendPost(
@@ -26,28 +26,27 @@ async function sendPost(
   message: string,
   tags: string[]
 ) {
-  const requestBody = JSON.stringify({
+  const requestBody = {
     name: title,
     message: { content: message },
     applied_tags: tags,
-  })
+  };
 
-  fetch(`https://discord.com/api/v9/channels/${channelId}/threads`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bot ${token}`,
-      "Content-Type": "application/json",
-    },
-    body: requestBody,
-  })
-    .then(response => {
-      if (!response.ok) {
-        logger.warn("Failed to send discord message", response)
+  try {
+    await axios.post(
+      `https://discord.com/api/v9/channels/${channelId}/threads`,
+      requestBody,
+      {
+        headers: {
+          "Authorization": `Bot ${token}`,
+          "Content-Type": "application/json",
+        },
       }
-    })
-    .catch(error => {
-      logger.error("Error sending discord message", error)
-    });
+    );
+  } catch (error) {
+    logger.error("Error sending discord post", error);
+    throw error;
+  }
 }
 
 export const discordUtils = {

@@ -11,7 +11,7 @@ apiApp.get("/health", (req, res) => {
 // youtube-new-video-notification
 apiApp.get(ytNotificationMethods.route, ytNotificationMethods.get);
 apiApp.post(ytNotificationMethods.route, ytNotificationMethods.post);
-apiApp.get(ytNotificationMethods.data.route, ytNotificationMethods.data.get);
+// apiApp.get(ytNotificationMethods.data.route, ytNotificationMethods.data.get);
 
 apiApp.use((req, res) => {
   res.status(404).send("404");

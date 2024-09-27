@@ -4,6 +4,7 @@ import { logger } from "firebase-functions/v2";
 import { xmlUtils } from "../../shared/xml";
 
 import { getCollection } from "../../data";
+import { Lock } from "../../shared/lock";
 import { handleNewVideo, isNewVideo } from "./functions";
 import { IYoutubePubSubUpdate } from "./vars";
 
@@ -19,20 +20,32 @@ async function update(req: express.Request, res: express.Response) {
   const data: IYoutubePubSubUpdate | null = await xmlUtils.parseXmlToJson(req.body.toString("utf-8"));
   const entry = data?.feed?.entry;
   if (entry) {
-    const videoList = await getCollection("videos");
-    const newVideo = isNewVideo(entry, videoList);
+    const videoId = entry["yt:videoId"];
+    if (!videoId) {
+      logger.info("❌ INVALID YoutubePubSubHub: Missing videoId", data);
+      return;
+    }
 
-    if (newVideo) {
-      logger.info("✅ NEW YoutubePubSubHub Update:", data)
-      await handleNewVideo(data);
-    } else {
-      logger.info("❌ OLD YoutubePubSubHub Update:", data)
+    const lock = new Lock(`video_lock_${videoId}`);
+    try {
+      await lock.acquire();
+
+      const videoList = await getCollection("videos");
+      const newVideo = await isNewVideo(entry, videoList);
+
+      if (newVideo) {
+        logger.info("✅ NEW YoutubePubSubHub Update:", data);
+        await handleNewVideo(data);
+      } else {
+        logger.info("❌ OLD YoutubePubSubHub Update:", data);
+      }
+    } finally {
+      await lock.release();
     }
   } else {
-    logger.info("❌ INVALID YoutubePubSubHub:", data)
+    logger.info("❌ INVALID YoutubePubSubHub:", data);
   }
 }
-
 async function getVideos(req: express.Request, res: express.Response) {
   res.status(200).send(await getCollection("videos"));
 }
