@@ -46,7 +46,7 @@ export async function handleNewVideo(data: IYoutubePubSubUpdate) {
 }
 
 export async function isNewVideo(entry: any, videoList: any): Promise<boolean> {
-  if (await isVideoLivestream(entry["yt:videoId"])) {
+  if (await isVideoLivestream(entry["yt:videoId"], entry.title)) {
     logger.info(`VIDEO IS LIVESTREAM ${entry["yt:videoId"]}`);
     return false;
   }
@@ -71,7 +71,12 @@ export async function isNewVideo(entry: any, videoList: any): Promise<boolean> {
   return true;
 }
 
-async function isVideoLivestream(videoId: string): Promise<boolean> {
+async function isVideoLivestream(videoId: string, title: string): Promise<boolean> {
+  if (title.includes("🔴")) {
+    logger.info(`Video ${videoId} is live based on title indicator`);
+    return true;
+  }
+
   const apiKey = process.env.YT_API_KEY || "";
   if (!apiKey) {
     logger.error("YT_API_KEY is not set");
